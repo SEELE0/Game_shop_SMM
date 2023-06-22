@@ -35,8 +35,6 @@ tomcat版本：9.0.52
 * （订单管理）
 ````
   orders_yifa.html，(已发货订单)
-  orders_weifa.html，(未发货订单)
-  orders_dai.html，(待付款订单)
   orders_yi.html.(已付款订单)
 ````
 * （用户管理）
