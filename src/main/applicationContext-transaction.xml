@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-4.3.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+	http://www.springframework.org/schema/mvc
+	http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd">
+
+	
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	<bean id="defaultWebSecurityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<!--注入认证器-->
+		<property name="authenticator" ref="modularrealmauthenticator"/>
+		<!--注入数据域-->
+		<property name="realm" ref="oaSysRealm"/>
+	</bean>
+	<!--数据域-->
+	<bean id="oaSysRealm" class="com.ssm.shiro.MyRealm"></bean>
+	<!--认证器-->
+	<bean id="modularrealmauthenticator" class="org.apache.shiro.authc.pam.ModularRealmAuthenticator">
+		<!--使用策略-->
+		<property name="authenticationStrategy">
+			<bean class="org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy"></bean>
+		</property>
+	</bean>
+
+	<!--4. 配置 LifecycleBeanPostProcessor. 可以自定的来调用配置在 Spring IOC 容器中 shiro bean 的生命周期方法-->
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+	<!--5. 启用 IOC 容器中使用 shiro 的注解. 但必须在配置了 LifecycleBeanPostProcessor 之后才可以使用.-->
+	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+		  depends-on="lifecycleBeanPostProcessor"/>
+	<bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+		<property name="securityManager" ref="defaultWebSecurityManager"/>
+	</bean>
+
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="defaultWebSecurityManager"/>
+		<!--登录页-->
+
+<!--		<property name="loginUrl" value="/admin/login.jsp"/>-->
+
+		<!--认证成功的页面-->
+		<property name="successUrl" value="/admin/index.jsp"/>
+		<!--认证失败的页面-->
+<!--		<property name="unauthorizedUrl" value="/jsp/user/unauthorized.jsp"/>-->
+
+		<property name="filterChainDefinitions">
+			<value>
+                /getGoods.do=anon
+				/login.do=anon
+				/admin/LoginOut.do=anon
+				/admin/login.jsp=anon
+				/admin/adminLogin.do=anon
+
+				/shop-user/*.jsp=anon
+				/static/**=anon
+
+				/shop-user/=anon
+				/shop-user/login.do=anon
+				*/loginOut.do=anon
+				**/loginOut.do=anon
+
+				/shop-user/register.do=anon
+				/shop-user/addPlainUsers.do=anon
+				/shop-user/update.do=anon
+				/shop-user/updateMagess.do=anon
+				/shop-user/updatePwds.do=anon
+
+
+				/Shop-SSM/css/**=anon
+				/Shop-SSM/js/**=anon
+				/images/**=anon
+				/css/**=anon
+				/js/**=anon
+				/Shop-SSM/images/**=anon
+				/**=authc
+			</value>
+		</property>
+
+	</bean>
+
+</beans>
